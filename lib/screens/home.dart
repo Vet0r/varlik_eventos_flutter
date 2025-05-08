@@ -42,6 +42,8 @@ class _HomePageState extends State<HomePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (eventos.isNotEmpty) _buildHero(eventos[0]),
+                        const SizedBox(height: 20),
+                        _buildCategorias(),
                         const SizedBox(height: 30),
                         _buildEventos(eventos.skip(1).toList()),
                       ],
@@ -118,6 +120,52 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildCategorias() {
+    final categorias = [
+      {'icon': Icons.computer, 'label': 'Tecnologia'},
+      {'icon': Icons.music_note, 'label': 'Música'},
+      {'icon': Icons.brush, 'label': 'Artes'},
+      {'icon': Icons.sports_basketball, 'label': 'Esporte'},
+      {'icon': Icons.restaurant, 'label': 'Comida'},
+      {'icon': Icons.business_center, 'label': 'Negócios'},
+    ];
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: categorias
+            .map((cat) => Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: Container(
+                    height: MediaQuery.of(context).size.height * 0.12,
+                    width: MediaQuery.of(context).size.width * 0.12,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[850],
+                      border: Border.all(color: Colors.white70),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircleAvatar(
+                          radius: 26,
+                          backgroundColor: Colors.grey[800],
+                          child: Icon(cat['icon'] as IconData,
+                              color: Colors.white),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(cat['label'] as String,
+                            style: const TextStyle(
+                                color: Colors.white70, fontSize: 12))
+                      ],
+                    ),
+                  ),
+                ))
+            .toList(),
+      ),
     );
   }
 
