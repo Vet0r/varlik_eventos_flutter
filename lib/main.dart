@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:varlik_eventos/provider/usuario.dart';
 import 'package:varlik_eventos/screens/login.dart';
 
 void main() {
-  runApp(const EventsApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UsuarioProvider()),
+      ],
+      child: EventsApp(),
+    ),
+  );
 }
 
 class EventsApp extends StatelessWidget {

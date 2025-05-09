@@ -26,11 +26,13 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _checkToken() async {
     final token = await getToken();
     if (token != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
-      print(token);
+      bool isValid = await validateToken(token);
+      if (isValid) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      }
     }
   }
 
