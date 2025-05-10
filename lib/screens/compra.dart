@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:varlik_eventos/models/evento.dart';
+import 'package:varlik_eventos/utils/consts.dart';
 
 class TelaCompraIngresso extends StatefulWidget {
   final Evento evento;
@@ -29,7 +30,9 @@ class _TelaCompraIngressoState extends State<TelaCompraIngresso> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       TextButton.icon(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
                         icon: const Icon(Icons.arrow_back, color: Colors.white),
                         label: const Text("Voltar para eventos",
                             style: TextStyle(color: Colors.white)),
@@ -38,7 +41,7 @@ class _TelaCompraIngressoState extends State<TelaCompraIngresso> {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(16),
                         child: Image.network(
-                          widget.evento.imagem,
+                          '$cloudFrontUrl${widget.evento.imagem}',
                           height: 220,
                           width: double.infinity,
                           fit: BoxFit.cover,

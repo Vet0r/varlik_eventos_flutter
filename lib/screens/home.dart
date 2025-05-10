@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:varlik_eventos/models/evento.dart';
 import 'package:varlik_eventos/screens/compra.dart';
+import 'package:varlik_eventos/utils/consts.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -61,7 +62,7 @@ class _HomePageState extends State<HomePage> {
         ClipRRect(
           borderRadius: BorderRadius.circular(16),
           child: Image.network(
-            'http://localhost:8000/storage/${evento.imagem}',
+            '$cloudFrontUrl${evento.imagem}',
             height: 220,
             width: double.infinity,
             fit: BoxFit.cover,
@@ -205,7 +206,7 @@ class _HomePageState extends State<HomePage> {
                         borderRadius: const BorderRadius.vertical(
                             top: Radius.circular(12)),
                         child: Image.network(
-                          'http://localhost:8000/storage/${evento.imagem}',
+                          '$cloudFrontUrl${evento.imagem}',
                           height: 100,
                           width: double.infinity,
                           fit: BoxFit.cover,
