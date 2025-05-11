@@ -14,6 +14,25 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String? categoriaSelecionada;
+  DateTime? dataInicio;
+  DateTime? dataFim;
+  String? localizacaoSelecionada;
+  String? nomeEventoSelecionado;
+
+  final TextEditingController _localizacaoController = TextEditingController();
+  final TextEditingController _nomeEventoController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _localizacaoController.dispose();
+    _nomeEventoController.dispose();
+    super.dispose();
+  }
 
   Future<List<Evento>> fetchEventos() async {
     final response = await http.get(Uri.parse('$baseUrl/api/v1/eventos/'));
@@ -33,11 +52,22 @@ class _HomePageState extends State<HomePage> {
         future: fetchEventos(),
         builder: (context, snapshot) {
           final eventos = snapshot.data ?? [];
-          final eventosFiltrados = categoriaSelecionada == null
-              ? eventos
-              : eventos
-                  .where((e) => e.categoria == categoriaSelecionada)
-                  .toList();
+          final eventosFiltrados = eventos.where((e) {
+            final categoriaMatch = categoriaSelecionada == null ||
+                e.categoria == categoriaSelecionada;
+            final localizacaoMatch = localizacaoSelecionada == null ||
+                e.localizacao
+                    .toLowerCase()
+                    .contains(localizacaoSelecionada!.toLowerCase());
+            final nomeMatch = nomeEventoSelecionado == null ||
+                e.titulo
+                    .toLowerCase()
+                    .contains(nomeEventoSelecionado!.toLowerCase());
+            final dataMatch = (dataInicio == null ||
+                    DateTime.parse(e.data).isAfter(dataInicio!)) &&
+                (dataFim == null || DateTime.parse(e.data).isBefore(dataFim!));
+            return categoriaMatch && localizacaoMatch && nomeMatch && dataMatch;
+          }).toList();
 
           return snapshot.connectionState == ConnectionState.waiting
               ? const Center(child: CircularProgressIndicator())
@@ -50,6 +80,8 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         if (eventosFiltrados.isNotEmpty)
                           _buildHero(eventosFiltrados[0]),
+                        const SizedBox(height: 20),
+                        _buildFiltros(),
                         const SizedBox(height: 20),
                         _buildCategorias(),
                         const SizedBox(height: 30),
@@ -152,45 +184,56 @@ class _HomePageState extends State<HomePage> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: categorias
-            .map((cat) => Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        categoriaSelecionada =
-                            categoriaSelecionada == cat['label']
-                                ? null
-                                : cat['label'] as String;
-                      });
-                    },
-                    child: Container(
-                      height: MediaQuery.of(context).size.height * 0.12,
-                      width: MediaQuery.of(context).size.width * 0.12,
-                      decoration: BoxDecoration(
-                        color: categoriaSelecionada == cat['label']
-                            ? Colors.red
-                            : Colors.grey[850],
-                        border: Border.all(color: Colors.white70),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CircleAvatar(
-                            radius: 26,
-                            backgroundColor: Colors.grey[800],
-                            child: Icon(cat['icon'] as IconData,
-                                color: Colors.white),
+            .map(
+              (cat) => Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () {
+                    setState(() {
+                      categoriaSelecionada =
+                          categoriaSelecionada == cat['label']
+                              ? null
+                              : cat['label'] as String;
+                    });
+                  },
+                  child: Container(
+                    width: 140,
+                    height: 100,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: categoriaSelecionada == cat['label']
+                          ? const Color(0xFF3A3A3C)
+                          : const Color(0xFF2C2C2E),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: categoriaSelecionada == cat['label']
+                          ? [
+                              BoxShadow(
+                                  color: Colors.red.withOpacity(0.3),
+                                  blurRadius: 6)
+                            ]
+                          : [],
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(cat['icon'] as IconData?,
+                            color: Colors.red, size: 28),
+                        const SizedBox(height: 8),
+                        Text(
+                          cat['label'] as String,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
                           ),
-                          const SizedBox(height: 6),
-                          Text(cat['label'] as String,
-                              style: const TextStyle(
-                                  color: Colors.white70, fontSize: 12))
-                        ],
-                      ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
                   ),
-                ))
+                ),
+              ),
+            )
             .toList(),
       ),
     );
@@ -316,4 +359,139 @@ class _HomePageState extends State<HomePage> {
       ],
     );
   }
+
+  Widget _buildFiltros() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            SizedBox(
+              width: 250,
+              child: TextField(
+                controller: _localizacaoController,
+                decoration: inputDecoration.copyWith(
+                  hintText: 'Localização',
+                  prefixIcon: const Icon(Icons.search, color: Colors.white54),
+                ),
+                style: const TextStyle(color: Colors.white),
+                onSubmitted: (value) {
+                  setState(() {
+                    localizacaoSelecionada = value.isNotEmpty ? value : null;
+                  });
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            SizedBox(
+              width: 250,
+              child: TextField(
+                controller: _nomeEventoController,
+                decoration: inputDecoration.copyWith(
+                  hintText: 'Nome do Evento',
+                  prefixIcon: const Icon(Icons.event, color: Colors.white54),
+                ),
+                style: const TextStyle(color: Colors.white),
+                onSubmitted: (value) {
+                  setState(() {
+                    nomeEventoSelecionado = value.isNotEmpty ? value : null;
+                  });
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            SizedBox(
+              width: 160,
+              child: TextFormField(
+                readOnly: true,
+                controller: TextEditingController(
+                  text: dataInicio == null
+                      ? 'dd/mm/aaaa'
+                      : '${dataInicio!.day}/${dataInicio!.month}/${dataInicio!.year}',
+                ),
+                onTap: () async {
+                  final pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+                  if (pickedDate != null) {
+                    setState(() {
+                      dataInicio = pickedDate;
+                    });
+                  }
+                },
+                style: const TextStyle(color: Colors.white),
+                decoration: inputDecoration.copyWith(
+                  suffixIcon:
+                      const Icon(Icons.calendar_today, color: Colors.white54),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            SizedBox(
+              width: 160,
+              child: TextFormField(
+                readOnly: true,
+                controller: TextEditingController(
+                  text: dataFim == null
+                      ? 'dd/mm/aaaa'
+                      : '${dataFim!.day}/${dataFim!.month}/${dataFim!.year}',
+                ),
+                onTap: () async {
+                  final pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+                  if (pickedDate != null) {
+                    setState(() {
+                      dataFim = pickedDate;
+                    });
+                  }
+                },
+                style: const TextStyle(color: Colors.white),
+                decoration: inputDecoration.copyWith(
+                  suffixIcon:
+                      const Icon(Icons.calendar_today, color: Colors.white54),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            TextButton.icon(
+              icon: const Icon(Icons.refresh, color: Colors.red),
+              label: const Text(
+                'Resetar Filtros',
+                style: TextStyle(color: Colors.red),
+              ),
+              onPressed: () {
+                setState(() {
+                  categoriaSelecionada = null;
+                  localizacaoSelecionada = null;
+                  nomeEventoSelecionado = null;
+                  dataInicio = null;
+                  dataFim = null;
+                  _localizacaoController.clear();
+                  _nomeEventoController.clear();
+                });
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 }
+
+final inputDecoration = InputDecoration(
+  filled: true,
+  fillColor: const Color(0xFF2C2C2E), // tom escuro
+  hintStyle: const TextStyle(color: Colors.white70),
+  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+  border: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(10),
+    borderSide: BorderSide.none,
+  ),
+);
