@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:varlik_eventos/models/evento.dart';
+import 'package:varlik_eventos/provider/usuario.dart';
+import 'package:varlik_eventos/utils/auth.dart';
 import 'package:varlik_eventos/utils/consts.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class TelaCompraIngresso extends StatefulWidget {
   final Evento evento;
@@ -12,6 +17,158 @@ class TelaCompraIngresso extends StatefulWidget {
 }
 
 class _TelaCompraIngressoState extends State<TelaCompraIngresso> {
+  String _metodoPagamento = "pix";
+
+  Future<Map<String, dynamic>> _fazerInscricao(Evento evento) async {
+    final url = Uri.parse('$baseUrl/api/v1/inscricoes');
+    final body = {
+      "user_id":
+          Provider.of<UsuarioProvider>(context, listen: false).usuario!.id,
+      "evento_id": evento.id,
+      "data_inscricao": DateTime.now().toIso8601String(),
+      "status": "confirmado"
+    };
+    String? token = await getToken();
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Erro ao criar inscrição: ${response.statusCode}');
+    }
+  }
+
+  Future<void> _finalizarCompra(
+      Map<String, dynamic> inscricao, Evento evento) async {
+    final url = Uri.parse('$baseUrl/api/v1/pagamentos');
+    String? token = await getToken();
+
+    final Map<String, dynamic> dados = {
+      "inscricao_id": inscricao['id'],
+      "valor": evento.preco + 1.99,
+      "metodo_pagamento": _metodoPagamento,
+      "status": "pago",
+      "data": DateTime.now().toIso8601String(),
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(dados),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      print('Pagamento enviado com sucesso: ${response.body}');
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 64,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                "Compra Finalizada",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      throw Exception('Erro ao enviar pagamento: ${response.statusCode}');
+    }
+  }
+
+  void _processarCompra(Evento evento) async {
+    try {
+      final inscricao = await _fazerInscricao(evento);
+      await _finalizarCompra(inscricao, evento);
+    } catch (e) {
+      print('Exception: $e');
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Erro"),
+          content: const Text(
+              "Não foi possível processar a compra. Tente novamente."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  botaoMeioDePagamento(String tipo) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _metodoPagamento = tipo;
+        });
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: _metodoPagamento == tipo ? Colors.green : Colors.transparent,
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Image.asset(
+            'assets/$tipo.jpg',
+            width: 50,
+            height: 30,
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -156,52 +313,28 @@ class _TelaCompraIngressoState extends State<TelaCompraIngresso> {
                             style: const TextStyle(
                                 color: Colors.redAccent,
                                 fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 24),
-                        const TextField(
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.black,
-                            hintText: "E-mail",
-                            hintStyle: TextStyle(color: Colors.white54),
-                            border: OutlineInputBorder(),
-                          ),
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
+                        const Text("Método de Pagamento",
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white)),
+                        const SizedBox(height: 8),
                         Row(
-                          children: const [
-                            Expanded(
-                              child: TextField(
-                                decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: Colors.black,
-                                  hintText: "Nome",
-                                  hintStyle: TextStyle(color: Colors.white54),
-                                  border: OutlineInputBorder(),
-                                ),
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                            SizedBox(width: 12),
-                            Expanded(
-                              child: TextField(
-                                decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: Colors.black,
-                                  hintText: "Sobrenome",
-                                  hintStyle: TextStyle(color: Colors.white54),
-                                  border: OutlineInputBorder(),
-                                ),
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            botaoMeioDePagamento("pix"),
+                            botaoMeioDePagamento("cartao"),
+                            botaoMeioDePagamento("boleto"),
                           ],
                         ),
                         const SizedBox(height: 24),
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              _processarCompra(widget.evento);
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.redAccent,
                               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -233,4 +366,42 @@ class _TelaCompraIngressoState extends State<TelaCompraIngresso> {
       ),
     );
   }
+}
+
+popUpConfirmacao(BuildContext context) {
+  return showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.check_circle, color: Colors.green, size: 64),
+          const SizedBox(height: 16),
+          const Text(
+            "Compra Finalizada",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    ),
+  );
 }

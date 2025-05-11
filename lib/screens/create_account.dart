@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:varlik_eventos/utils/consts.dart';
 
 class CreateAccountPage extends StatefulWidget {
   const CreateAccountPage({super.key});
@@ -217,7 +218,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
 Future<void> register(
     String name, String email, String password, String passwordConf) async {
-  final url = Uri.parse('http://127.0.0.1:8000/api/v1/register');
+  final url = Uri.parse('$baseUrl/api/v1/register');
 
   try {
     final response = await http.post(

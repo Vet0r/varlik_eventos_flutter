@@ -14,6 +14,8 @@ void main() {
   );
 }
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 class EventsApp extends StatelessWidget {
   const EventsApp({super.key});
 
@@ -33,6 +35,7 @@ class EventsApp extends StatelessWidget {
           hintStyle: const TextStyle(color: Colors.grey),
         ),
       ),
+      navigatorKey: navigatorKey,
       home: LoginPage(),
       debugShowCheckedModeBanner: false,
     );

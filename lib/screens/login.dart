@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:varlik_eventos/provider/usuario.dart';
 import 'package:varlik_eventos/screens/create_account.dart';
 import 'package:varlik_eventos/screens/home.dart';
 import 'package:varlik_eventos/utils/auth.dart';
+import 'package:varlik_eventos/utils/consts.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({super.key});
@@ -25,6 +28,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _checkToken() async {
     final token = await getToken();
+    Provider.of<UsuarioProvider>(context, listen: false).loadUsuario();
     if (token != null) {
       bool isValid = await validateToken(token);
       if (isValid) {
@@ -133,7 +137,7 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 Future<void> login(String email, String password) async {
-  final url = Uri.parse('http://127.0.0.1:8000/api/v1/login');
+  final url = Uri.parse('$baseUrl/api/v1/login');
 
   try {
     final response = await http.post(

@@ -14,9 +14,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Future<List<Evento>> fetchEventos() async {
-    final response =
-        await http.get(Uri.parse('http://localhost:8000/api/v1/eventos/'));
-
+    final response = await http.get(Uri.parse('$baseUrl/api/v1/eventos/'));
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       return List<Evento>.from(data.map((e) => Evento.fromJson(e)));
@@ -111,7 +109,14 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 10),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TelaCompraIngresso(evento: evento),
+                    ),
+                  );
+                },
                 child: const Text(
                   'Comprar Ingressos',
                   style: TextStyle(color: Colors.white),

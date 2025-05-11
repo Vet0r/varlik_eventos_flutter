@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:varlik_eventos/utils/consts.dart';
 
 Future<void> saveToken(String token) async {
   final prefs = await SharedPreferences.getInstance();
@@ -12,7 +13,7 @@ Future<String?> getToken() async {
 }
 
 Future<bool> validateToken(String token) async {
-  final url = Uri.parse('http://127.0.0.1:8000/api/v1/validate-token');
+  final url = Uri.parse('$baseUrl/api/v1/validate-token');
 
   try {
     final response = await http.get(
