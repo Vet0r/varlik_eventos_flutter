@@ -4,6 +4,7 @@ class Evento {
   final String descricao;
   final String data;
   final String localizacao;
+  final String categoria;
   final int organizadorId;
   final int capacidade;
   final double preco;
@@ -17,6 +18,7 @@ class Evento {
     required this.descricao,
     required this.data,
     required this.localizacao,
+    required this.categoria,
     required this.organizadorId,
     required this.capacidade,
     required this.preco,
@@ -31,6 +33,7 @@ class Evento {
       titulo: json['titulo'],
       descricao: json['descricao'],
       data: json['data'],
+      categoria: json['categoria'],
       localizacao: json['localizacao'],
       organizadorId: json['organizador_id'],
       capacidade: json['capacidade'],
@@ -48,6 +51,7 @@ class Evento {
       'descricao': descricao,
       'data': data,
       'localizacao': localizacao,
+      'categoria': categoria,
       'organizador_id': organizadorId,
       'capacidade': capacidade,
       'preco': preco,
