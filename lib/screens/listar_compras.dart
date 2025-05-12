@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:varlik_eventos/screens/widgets/appbar.dart';
 import 'package:varlik_eventos/screens/widgets/detalhes_compra.dart';
+import 'package:varlik_eventos/utils/capitalize.dart';
 import 'package:varlik_eventos/utils/consts.dart';
 import 'package:varlik_eventos/utils/auth.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -234,6 +235,15 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
                   Text('Data da Compra: ${item.data}',
                       style: const TextStyle(color: Colors.white70)),
                 ],
+              ),
+            ),
+            Expanded(
+              child: Chip(
+                label: Text(item.inscricao.status.capitalize(),
+                    style: const TextStyle(color: Colors.white)),
+                backgroundColor: item.inscricao.status == 'confirmado'
+                    ? Colors.green
+                    : Colors.red,
               ),
             ),
             Column(
