@@ -44,7 +44,9 @@ class _PainelOrganizadorState extends State<PainelOrganizador> {
       if (token == null) throw Exception('Token não encontrado');
 
       final response = await http.get(
-        Uri.parse('$baseUrl/api/v1/eventos?organizadorId=${usuario.id}'),
+        usuario.tipo == 'administrador'
+            ? Uri.parse('$baseUrl/api/v1/eventos')
+            : Uri.parse('$baseUrl/api/v1/eventos?organizadorId=${usuario.id}'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

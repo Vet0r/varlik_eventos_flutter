@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 import 'package:varlik_eventos/provider/usuario.dart';
 import 'package:varlik_eventos/screens/create_new_event.dart';
 import 'package:varlik_eventos/screens/dashboard_admin.dart';
@@ -45,7 +44,8 @@ class CustomTopBar extends StatelessWidget implements PreferredSizeWidget {
               context: context,
               position: const RelativeRect.fromLTRB(100, 80, 0, 0),
               items: [
-                if (usuario != null && usuario.tipo == 'organizador')
+                if (usuario != null && usuario.tipo == 'organizador' ||
+                    usuario?.tipo == 'administrador')
                   PopupMenuItem(
                     value: 'painel_eventos',
                     child: Text('Painel de Eventos'),
