@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:varlik_eventos/models/evento.dart';
 import 'package:varlik_eventos/models/inscricao.dart';
 import 'package:varlik_eventos/provider/usuario.dart';
+import 'package:varlik_eventos/screens/editar_evento.dart';
 import 'package:varlik_eventos/screens/widgets/appbar.dart';
 import 'package:varlik_eventos/utils/auth.dart';
 import 'package:varlik_eventos/utils/consts.dart';
@@ -227,31 +228,42 @@ class _PainelOrganizadorState extends State<PainelOrganizador> {
   }
 
   Widget _buildEventoCard(Evento evento) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF2A2A2A),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(evento.titulo,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text(evento.descricao, style: const TextStyle(color: Colors.grey)),
-            const SizedBox(height: 8),
-            Text('Data: ${evento.data}',
-                style: const TextStyle(color: Colors.grey)),
-            Text('Local: ${evento.localizacao}',
-                style: const TextStyle(color: Colors.grey)),
-          ],
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EditarEventoPage(evento: evento),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF2A2A2A),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(evento.titulo,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Text(evento.descricao,
+                  style: const TextStyle(color: Colors.grey)),
+              const SizedBox(height: 8),
+              Text('Data: ${evento.data}',
+                  style: const TextStyle(color: Colors.grey)),
+              Text('Local: ${evento.localizacao}',
+                  style: const TextStyle(color: Colors.grey)),
+            ],
+          ),
         ),
       ),
     );
