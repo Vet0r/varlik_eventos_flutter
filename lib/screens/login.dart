@@ -93,15 +93,27 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: () async {
                     await login(
                         _emailController.text, _passwordController.text);
-                    await getToken();
                     final token = await getToken();
                     if (token != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HomePage(),
-                        ),
-                      );
+                      await Provider.of<UsuarioProvider>(context, listen: false)
+                          .loadUsuario();
+                      if (Provider.of<UsuarioProvider>(context, listen: false)
+                              .usuario !=
+                          null) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HomePage(),
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'Erro ao carregar usuário. Tente novamente.'),
+                          ),
+                        );
+                      }
                     }
                   },
                   child: const Text('Entrar'),

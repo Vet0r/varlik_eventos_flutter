@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:varlik_eventos/models/evento.dart';
 import 'package:varlik_eventos/screens/compra.dart';
+import 'package:varlik_eventos/screens/widgets/appbar.dart';
 import 'package:varlik_eventos/utils/consts.dart';
 
 class HomePage extends StatefulWidget {
@@ -47,6 +48,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: CustomTopBar(),
       backgroundColor: const Color(0xFF1F1F1F),
       body: FutureBuilder<List<Evento>>(
         future: fetchEventos(),
@@ -366,22 +368,6 @@ class _HomePageState extends State<HomePage> {
       children: [
         Row(
           children: [
-            SizedBox(
-              width: 250,
-              child: TextField(
-                controller: _localizacaoController,
-                decoration: inputDecoration.copyWith(
-                  hintText: 'Localização',
-                  prefixIcon: const Icon(Icons.search, color: Colors.white54),
-                ),
-                style: const TextStyle(color: Colors.white),
-                onSubmitted: (value) {
-                  setState(() {
-                    localizacaoSelecionada = value.isNotEmpty ? value : null;
-                  });
-                },
-              ),
-            ),
             const SizedBox(width: 16),
             SizedBox(
               width: 250,
@@ -457,6 +443,23 @@ class _HomePageState extends State<HomePage> {
                   suffixIcon:
                       const Icon(Icons.calendar_today, color: Colors.white54),
                 ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            SizedBox(
+              width: 250,
+              child: TextField(
+                controller: _localizacaoController,
+                decoration: inputDecoration.copyWith(
+                  hintText: 'Localização',
+                  prefixIcon: const Icon(Icons.search, color: Colors.white54),
+                ),
+                style: const TextStyle(color: Colors.white),
+                onSubmitted: (value) {
+                  setState(() {
+                    localizacaoSelecionada = value.isNotEmpty ? value : null;
+                  });
+                },
               ),
             ),
             const SizedBox(width: 16),
