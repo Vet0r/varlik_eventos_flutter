@@ -263,6 +263,7 @@ class _HomePageState extends State<HomePage> {
           ),
           itemBuilder: (context, index) {
             final evento = eventos[index];
+            print(evento.imagem);
             return Container(
               decoration: BoxDecoration(
                 color: Colors.grey[900],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:varlik_eventos/provider/usuario.dart';
 import 'package:varlik_eventos/screens/login.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   runApp(
@@ -38,6 +39,15 @@ class EventsApp extends StatelessWidget {
       ),
       navigatorKey: navigatorKey,
       home: LoginPage(),
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('pt', 'BR'),
+        Locale('en', 'US'),
+      ],
       debugShowCheckedModeBanner: false,
     );
   }

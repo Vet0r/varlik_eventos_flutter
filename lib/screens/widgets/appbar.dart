@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:varlik_eventos/provider/usuario.dart';
+import 'package:varlik_eventos/screens/create_new_event.dart';
 import 'package:varlik_eventos/screens/dashboard_admin.dart';
 import 'package:varlik_eventos/screens/listar_compras.dart';
 import 'package:varlik_eventos/screens/login.dart';
@@ -49,6 +50,11 @@ class CustomTopBar extends StatelessWidget implements PreferredSizeWidget {
                     value: 'painel_eventos',
                     child: Text('Painel de Eventos'),
                   ),
+                if (usuario != null && usuario.tipo == 'organizador')
+                  PopupMenuItem(
+                    value: 'add_eventos',
+                    child: Text('Adicionar Evento'),
+                  ),
                 if (usuario != null && usuario.tipo == 'administrador')
                   PopupMenuItem(
                     value: 'recursos_administrador',
@@ -92,6 +98,12 @@ class CustomTopBar extends StatelessWidget implements PreferredSizeWidget {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => const PurchaseHistoryPage(),
+                  ),
+                );
+              } else if (value == 'add_eventos') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const AdicionarEventoPage(),
                   ),
                 );
               } else if (value == 'logout') {
