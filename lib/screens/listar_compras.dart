@@ -6,6 +6,9 @@ import 'package:varlik_eventos/screens/widgets/detalhes_compra.dart';
 import 'package:varlik_eventos/utils/consts.dart';
 import 'package:varlik_eventos/utils/auth.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:varlik_eventos/models/pagamento.dart';
+import 'package:varlik_eventos/models/inscricao.dart';
+import 'package:varlik_eventos/models/merged_data.dart';
 
 class PurchaseHistoryPage extends StatefulWidget {
   const PurchaseHistoryPage({super.key});
@@ -39,7 +42,7 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetchPayments() async {
+  Future<List<Pagamento>> fetchPayments() async {
     final token = await getToken();
     if (token == null) {
       throw Exception('Usuário não autenticado');
@@ -54,13 +57,14 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
     );
 
     if (response.statusCode == 200) {
-      return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+      final List<dynamic> jsonList = jsonDecode(response.body);
+      return jsonList.map((json) => Pagamento.fromJson(json)).toList();
     } else {
       throw Exception('Falha ao carregar pagamentos');
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetchSubscriptions() async {
+  Future<List<Inscricao>> fetchSubscriptions() async {
     final token = await getToken();
     if (token == null) {
       throw Exception('Usuário não autenticado');
@@ -75,7 +79,8 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
     );
 
     if (response.statusCode == 200) {
-      return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+      final List<dynamic> jsonList = jsonDecode(response.body);
+      return jsonList.map((json) => Inscricao.fromJson(json)).toList();
     } else {
       throw Exception('Falha ao carregar inscrições');
     }
@@ -92,37 +97,37 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetchCombinedData() async {
+  Future<List<MergedData>> fetchCombinedData() async {
     final payments = await fetchPayments();
     final subscriptions = await fetchSubscriptions();
 
-    final combinedData = <Map<String, dynamic>>[];
+    final combinedData = <MergedData>[];
 
     for (final payment in payments) {
       final subscription = subscriptions.firstWhere(
-        (sub) => sub['id'] == payment['inscricao_id'],
-        orElse: () => {},
+        (sub) => sub.id == payment.inscricaoId,
+        orElse: () => throw Exception(
+            'Inscrição não encontrada para o pagamento ${payment.id}'),
       );
 
-      if (subscription.isNotEmpty) {
-        final eventDetails = await fetchEventDetails(subscription['evento_id']);
-        combinedData.add({
-          'evento_nome': eventDetails['titulo'],
-          'data': payment['data'],
-          'valor': payment['valor'],
-          'categoria': eventDetails['categoria'],
-        });
-      }
+      final eventDetails = await fetchEventDetails(subscription.eventoId);
+      combinedData.add(MergedData(
+        eventoNome: eventDetails['titulo'],
+        data: payment.data,
+        valor: payment.valor,
+        categoria: eventDetails['categoria'],
+        pagamento: payment,
+        inscricao: subscription,
+      ));
     }
 
     return combinedData;
   }
 
-  List<Map<String, dynamic>> _filterByCategory(
-      List<Map<String, dynamic>> data, String category) {
+  List<MergedData> _filterByCategory(List<MergedData> data, String category) {
     if (category == 'Todas as Categorias') return data;
     return data
-        .where((item) => item['categoria']
+        .where((item) => item.categoria
             .toString()
             .toLowerCase()
             .contains(category.toLowerCase()))
@@ -155,13 +160,12 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
     );
   }
 
-  Widget _buildSummary(List<Map<String, dynamic>> combinedData) {
-    final totalSpent =
-        combinedData.fold(0.0, (sum, item) => sum + (item['valor'] as double));
+  Widget _buildSummary(List<MergedData> combinedData) {
+    final totalSpent = combinedData.fold(0.0, (sum, item) => sum + item.valor);
     final totalEvents = combinedData.length;
     final averagePrice = totalEvents > 0 ? totalSpent / totalEvents : 0.0;
     final lastPurchase =
-        combinedData.isNotEmpty ? combinedData.last['data'] : 'N/A';
+        combinedData.isNotEmpty ? combinedData.last.data : 'N/A';
 
     final summary = [
       {'title': 'Total Gasto', 'value': 'R\$ ${totalSpent.toStringAsFixed(2)}'},
@@ -202,7 +206,7 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
     );
   }
 
-  List<Widget> _buildPurchaseCards(List<Map<String, dynamic>> combinedData) {
+  List<Widget> _buildPurchaseCards(List<MergedData> combinedData) {
     return combinedData.map((item) {
       return Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -219,12 +223,12 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(item['evento_nome'],
+                  Text(item.eventoNome,
                       style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.white)),
-                  Text('Data da Compra: ${item['data']}',
+                  Text('Data da Compra: ${item.data}',
                       style: const TextStyle(color: Colors.white70)),
                 ],
               ),
@@ -232,7 +236,7 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text('R\$ ${item['valor']}',
+                Text('R\$ ${item.valor}',
                     style: const TextStyle(
                         fontWeight: FontWeight.bold, color: Colors.red)),
               ],
@@ -242,18 +246,7 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
               style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF444444)),
               onPressed: () {
-                showTicketDetailsDialog(context, {
-                  'evento_nome': item['evento_nome'],
-                  'data': item['data'],
-                  'valor': item['valor'],
-                  'categoria': item['categoria'],
-                  'id': item['id'],
-                  'metodo_pagamento': item['metodo_pagamento'],
-                  'localizacao': item['localizacao'],
-                  'tipo_ingresso': item['tipo_ingresso'],
-                  'quantidade': item['quantidade'],
-                  'status': item['status'],
-                });
+                showTicketDetailsDialog(context, item);
               },
               child: const Text('Ver Detalhes'),
             )
@@ -263,11 +256,10 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
     }).toList();
   }
 
-  List<Map<String, dynamic>> _filterData(
-      List<Map<String, dynamic>> data, String query) {
+  List<MergedData> _filterData(List<MergedData> data, String query) {
     if (query.isEmpty) return data;
     return data
-        .where((item) => item['evento_nome']
+        .where((item) => item.eventoNome
             .toString()
             .toLowerCase()
             .contains(query.toLowerCase()))
@@ -338,7 +330,7 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
               ],
             ),
             const SizedBox(height: 24),
-            FutureBuilder<List<Map<String, dynamic>>>(
+            FutureBuilder<List<MergedData>>(
               future: fetchCombinedData(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {

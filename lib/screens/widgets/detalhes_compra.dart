@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:varlik_eventos/screens/widgets/info_row.dart';
+import 'package:varlik_eventos/models/merged_data.dart';
 
-void showTicketDetailsDialog(
-    BuildContext context, Map<String, dynamic> ticketDetails) {
+void showTicketDetailsDialog(BuildContext context, MergedData ticketDetails) {
   showDialog(
     context: context,
     builder: (_) => Dialog(
@@ -33,7 +33,7 @@ void showTicketDetailsDialog(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(ticketDetails['evento_nome'],
+                      Text(ticketDetails.eventoNome,
                           style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -44,15 +44,14 @@ void showTicketDetailsDialog(
                           const Icon(Icons.calendar_today,
                               size: 16, color: Colors.grey),
                           const SizedBox(width: 4),
-                          Text(ticketDetails['data'],
+                          Text(ticketDetails.data,
                               style: const TextStyle(color: Colors.grey)),
                           const SizedBox(width: 16),
                           const Icon(Icons.location_on,
                               size: 16, color: Colors.grey),
                           const SizedBox(width: 4),
                           Text(
-                              ticketDetails['localizacao'] ??
-                                  'Local não informado',
+                              'Local não informado', // Placeholder as `localizacao` is not defined
                               style: const TextStyle(color: Colors.grey)),
                         ],
                       ),
@@ -83,17 +82,17 @@ void showTicketDetailsDialog(
                       const SizedBox(height: 12),
                       InfoRow(
                           title: 'Número do Pedido',
-                          value: ticketDetails['id'].toString()),
+                          value: ticketDetails.pagamento.id.toString()),
                       InfoRow(
                           title: 'Data da Compra',
-                          value: ticketDetails['data']),
+                          value: ticketDetails.pagamento.data),
                       InfoRow(
                           title: 'Método de Pagamento',
-                          value: ticketDetails['metodo_pagamento'] ??
+                          value: ticketDetails.pagamento.metodoPagamento ??
                               'Não informado'),
                       InfoRow(
                           title: 'Valor Pago',
-                          value: 'R\$ ${ticketDetails['valor']}',
+                          value: 'R\$ ${ticketDetails.valor}',
                           red: true),
                     ],
                   ),
@@ -111,23 +110,24 @@ void showTicketDetailsDialog(
                       const SizedBox(height: 12),
                       InfoRow(
                           title: 'Tipo de Ingresso',
-                          value: ticketDetails['tipo_ingresso'] ??
-                              'Não informado'),
+                          value:
+                              'Não informado'), // Placeholder as `tipoIngresso` is not defined
                       InfoRow(
                           title: 'Quantidade',
                           value:
-                              ticketDetails['quantidade']?.toString() ?? '1'),
+                              '1'), // Placeholder as `quantidade` is not defined
                       Row(
                         children: [
                           const Text('Status',
                               style: TextStyle(color: Colors.grey)),
                           const Spacer(),
                           Chip(
-                            label: Text(ticketDetails['status'] ?? 'Ativo',
+                            label: Text(ticketDetails.inscricao.status,
                                 style: const TextStyle(color: Colors.white)),
-                            backgroundColor: ticketDetails['status'] == 'Ativo'
-                                ? Colors.green
-                                : Colors.red,
+                            backgroundColor:
+                                ticketDetails.inscricao.status == 'Ativo'
+                                    ? Colors.green
+                                    : Colors.red,
                           )
                         ],
                       )
