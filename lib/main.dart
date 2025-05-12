@@ -23,16 +23,17 @@ class EventsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Eventos',
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF1F1F1F),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: const Color(0xFF2A2A2A),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide.none,
-          ),
-          hintStyle: const TextStyle(color: Colors.grey),
+      theme: ThemeData(
+        primarySwatch: Colors.red,
+        colorScheme: const ColorScheme.dark(
+          primary: Colors.white,
+          onPrimary: Colors.black,
+          secondary: Colors.grey,
+        ),
+        scaffoldBackgroundColor: const Color(0xFF2C2C2E),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF2C2C2E),
+          elevation: 0,
         ),
       ),
       navigatorKey: navigatorKey,

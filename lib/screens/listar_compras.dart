@@ -111,12 +111,14 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
       );
 
       final eventDetails = await fetchEventDetails(subscription.eventoId);
+      print(eventDetails);
       combinedData.add(MergedData(
         eventoNome: eventDetails['titulo'],
         data: payment.data,
         valor: payment.valor,
         categoria: eventDetails['categoria'],
         pagamento: payment,
+        localizacao: eventDetails['localizacao'],
         inscricao: subscription,
       ));
     }

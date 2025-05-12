@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:varlik_eventos/screens/widgets/info_row.dart';
 import 'package:varlik_eventos/models/merged_data.dart';
+import 'package:varlik_eventos/utils/capitalize.dart';
 
 void showTicketDetailsDialog(BuildContext context, MergedData ticketDetails) {
   showDialog(
@@ -15,7 +16,6 @@ void showTicketDetailsDialog(BuildContext context, MergedData ticketDetails) {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -50,8 +50,7 @@ void showTicketDetailsDialog(BuildContext context, MergedData ticketDetails) {
                           const Icon(Icons.location_on,
                               size: 16, color: Colors.grey),
                           const SizedBox(width: 4),
-                          Text(
-                              'Local não informado', // Placeholder as `localizacao` is not defined
+                          Text(ticketDetails.localizacao,
                               style: const TextStyle(color: Colors.grey)),
                         ],
                       ),
@@ -65,12 +64,9 @@ void showTicketDetailsDialog(BuildContext context, MergedData ticketDetails) {
               ],
             ),
             const Divider(color: Colors.grey, height: 32),
-
-            // Details
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Purchase Details
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,8 +84,8 @@ void showTicketDetailsDialog(BuildContext context, MergedData ticketDetails) {
                           value: ticketDetails.pagamento.data),
                       InfoRow(
                           title: 'Método de Pagamento',
-                          value: ticketDetails.pagamento.metodoPagamento ??
-                              'Não informado'),
+                          value: ticketDetails.pagamento.metodoPagamento
+                              .capitalize()),
                       InfoRow(
                           title: 'Valor Pago',
                           value: 'R\$ ${ticketDetails.valor}',
@@ -98,7 +94,6 @@ void showTicketDetailsDialog(BuildContext context, MergedData ticketDetails) {
                   ),
                 ),
                 const SizedBox(width: 24),
-                // Ticket Info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,24 +103,18 @@ void showTicketDetailsDialog(BuildContext context, MergedData ticketDetails) {
                               fontWeight: FontWeight.bold,
                               color: Colors.white)),
                       const SizedBox(height: 12),
-                      InfoRow(
-                          title: 'Tipo de Ingresso',
-                          value:
-                              'Não informado'), // Placeholder as `tipoIngresso` is not defined
-                      InfoRow(
-                          title: 'Quantidade',
-                          value:
-                              '1'), // Placeholder as `quantidade` is not defined
+                      InfoRow(title: 'Quantidade', value: '1'),
                       Row(
                         children: [
                           const Text('Status',
                               style: TextStyle(color: Colors.grey)),
                           const Spacer(),
                           Chip(
-                            label: Text(ticketDetails.inscricao.status,
+                            label: Text(
+                                ticketDetails.inscricao.status.capitalize(),
                                 style: const TextStyle(color: Colors.white)),
                             backgroundColor:
-                                ticketDetails.inscricao.status == 'Ativo'
+                                ticketDetails.inscricao.status == 'confirmado'
                                     ? Colors.green
                                     : Colors.red,
                           )
@@ -136,12 +125,9 @@ void showTicketDetailsDialog(BuildContext context, MergedData ticketDetails) {
                 )
               ],
             ),
-
             const SizedBox(height: 24),
             const Divider(color: Colors.grey),
             const SizedBox(height: 12),
-
-            // Actions
             const Text('Ações Disponíveis',
                 style: TextStyle(
                     fontWeight: FontWeight.bold, color: Colors.white)),
@@ -183,11 +169,6 @@ void showTicketDetailsDialog(BuildContext context, MergedData ticketDetails) {
                 )
               ],
             ),
-            const SizedBox(height: 12),
-            const Text(
-              'Solicitações de reembolso devem ser feitas com pelo menos 48 horas de antecedência. Termos e condições se aplicam.',
-              style: TextStyle(color: Colors.grey, fontSize: 12),
-            )
           ],
         ),
       ),
