@@ -165,11 +165,15 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
   }
 
   Widget _buildSummary(List<MergedData> combinedData) {
-    final totalSpent = combinedData.fold(0.0, (sum, item) => sum + item.valor);
-    final totalEvents = combinedData.length;
+    final filtered = combinedData
+        .where((item) =>
+            item.inscricao.status == 'confirmado' ||
+            item.inscricao.status == 'pendente')
+        .toList();
+    final totalSpent = filtered.fold(0.0, (sum, item) => sum + item.valor);
+    final totalEvents = filtered.length;
     final averagePrice = totalEvents > 0 ? totalSpent / totalEvents : 0.0;
-    final lastPurchase =
-        combinedData.isNotEmpty ? combinedData.last.data : 'N/A';
+    final lastPurchase = filtered.isNotEmpty ? filtered.last.data : 'N/A';
 
     final summary = [
       {'title': 'Total Gasto', 'value': 'R\$ ${totalSpent.toStringAsFixed(2)}'},

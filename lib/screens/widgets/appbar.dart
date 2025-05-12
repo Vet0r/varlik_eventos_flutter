@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:varlik_eventos/provider/usuario.dart';
+import 'package:varlik_eventos/screens/dashboard_admin.dart';
 import 'package:varlik_eventos/screens/listar_compras.dart';
 import 'package:varlik_eventos/screens/login.dart';
 import 'package:varlik_eventos/screens/painel_eventos.dart';
+import 'package:varlik_eventos/utils/consts.dart';
 
 class CustomTopBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomTopBar({super.key});
@@ -33,7 +37,7 @@ class CustomTopBar extends StatelessWidget implements PreferredSizeWidget {
         const SizedBox(width: 12),
         IconButton(
           icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-          onPressed: () {
+          onPressed: () async {
             final usuario =
                 Provider.of<UsuarioProvider>(context, listen: false).usuario;
             showMenu(
@@ -45,6 +49,16 @@ class CustomTopBar extends StatelessWidget implements PreferredSizeWidget {
                     value: 'painel_eventos',
                     child: Text('Painel de Eventos'),
                   ),
+                if (usuario != null && usuario.tipo == 'administrador')
+                  PopupMenuItem(
+                    value: 'recursos_administrador',
+                    child: Text('Recursos Administrativos'),
+                  ),
+                if (usuario != null && usuario.tipo == 'administrador')
+                  PopupMenuItem(
+                    value: 'painel_administrador',
+                    child: Text('Painel do Administrador'),
+                  ),
                 PopupMenuItem(
                   value: 'minhas_compras',
                   child: Text('Minhas compras'),
@@ -54,13 +68,26 @@ class CustomTopBar extends StatelessWidget implements PreferredSizeWidget {
                   child: Text('Logout'),
                 ),
               ],
-            ).then((value) {
+            ).then((value) async {
               if (value == 'painel_eventos') {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => const PainelOrganizador(),
                   ),
                 );
+              } else if (value == 'recursos_administrador') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const DashboardAdminPage(),
+                  ),
+                );
+              } else if (value == 'painel_administrador') {
+                final Uri url = Uri.parse('$baseUrl/admin');
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                } else {
+                  throw 'Could not launch $url';
+                }
               } else if (value == 'minhas_compras') {
                 Navigator.of(context).push(
                   MaterialPageRoute(

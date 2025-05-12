@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:varlik_eventos/screens/home.dart';
 import 'package:varlik_eventos/screens/widgets/info_row.dart';
 import 'package:varlik_eventos/models/merged_data.dart';
 import 'package:varlik_eventos/utils/capitalize.dart';
@@ -59,7 +60,12 @@ Future<void> changeStatus(
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const HomePage(),
+              ),
+            ),
             child: const Text("OK", style: TextStyle(color: Colors.black)),
           ),
         ],
