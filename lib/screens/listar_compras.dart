@@ -111,7 +111,6 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
       );
 
       final eventDetails = await fetchEventDetails(subscription.eventoId);
-      print(eventDetails);
       combinedData.add(MergedData(
         eventoNome: eventDetails['titulo'],
         data: payment.data,
@@ -122,6 +121,9 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
         inscricao: subscription,
       ));
     }
+
+    // Ordenar os dados combinados por data em ordem decrescente
+    combinedData.sort((a, b) => b.data.compareTo(a.data));
 
     return combinedData;
   }

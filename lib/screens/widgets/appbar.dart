@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:varlik_eventos/provider/usuario.dart';
 import 'package:varlik_eventos/screens/listar_compras.dart';
 import 'package:varlik_eventos/screens/login.dart';
+import 'package:varlik_eventos/screens/painel_eventos.dart';
 
 class CustomTopBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomTopBar({super.key});
@@ -33,10 +34,17 @@ class CustomTopBar extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
           onPressed: () {
+            final usuario =
+                Provider.of<UsuarioProvider>(context, listen: false).usuario;
             showMenu(
               context: context,
               position: const RelativeRect.fromLTRB(100, 80, 0, 0),
               items: [
+                if (usuario != null && usuario.tipo == 'organizador')
+                  PopupMenuItem(
+                    value: 'painel_eventos',
+                    child: Text('Painel de Eventos'),
+                  ),
                 PopupMenuItem(
                   value: 'minhas_compras',
                   child: Text('Minhas compras'),
@@ -47,7 +55,13 @@ class CustomTopBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ],
             ).then((value) {
-              if (value == 'minhas_compras') {
+              if (value == 'painel_eventos') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const PainelOrganizador(),
+                  ),
+                );
+              } else if (value == 'minhas_compras') {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => const PurchaseHistoryPage(),

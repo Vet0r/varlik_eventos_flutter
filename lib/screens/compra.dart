@@ -121,7 +121,6 @@ class _TelaCompraIngressoState extends State<TelaCompraIngresso> {
       final inscricao = await _fazerInscricao(evento);
       await _finalizarCompra(inscricao, evento);
     } catch (e) {
-      print('Exception: $e');
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
