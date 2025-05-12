@@ -122,7 +122,6 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
       ));
     }
 
-    // Ordenar os dados combinados por data em ordem decrescente
     combinedData.sort((a, b) => b.data.compareTo(a.data));
 
     return combinedData;
@@ -334,41 +333,43 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
               ],
             ),
             const SizedBox(height: 24),
-            FutureBuilder<List<MergedData>>(
-              future: fetchCombinedData(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      'Erro: ${snapshot.error}',
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  );
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'Sem compras realizadas',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  );
-                } else {
-                  final filteredData = _filterByCategory(
-                    _filterData(snapshot.data!, _searchController.text),
-                    _selectedCategory,
-                  );
-                  return Expanded(
-                    child: Column(
-                      children: [
-                        ..._buildPurchaseCards(filteredData),
-                        const SizedBox(height: 24),
-                        _buildSummary(filteredData),
-                      ],
-                    ),
-                  );
-                }
-              },
+            Expanded(
+              child: FutureBuilder<List<MergedData>>(
+                future: fetchCombinedData(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'Erro: ${snapshot.error}',
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    );
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'Sem compras realizadas',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    );
+                  } else {
+                    final filteredData = _filterByCategory(
+                      _filterData(snapshot.data!, _searchController.text),
+                      _selectedCategory,
+                    );
+                    return SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          _buildSummary(filteredData),
+                          const SizedBox(height: 24),
+                          ..._buildPurchaseCards(filteredData),
+                        ],
+                      ),
+                    );
+                  }
+                },
+              ),
             ),
           ],
         ),
