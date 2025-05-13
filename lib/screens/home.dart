@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<List<Evento>> fetchEventos() async {
-    final response = await http.get(Uri.parse('$baseUrl/api/v1/eventos/'));
+    final response = await http.get(Uri.parse('$baseUrl/api/v1/eventos'));
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       return List<Evento>.from(data.map((e) => Evento.fromJson(e)));
@@ -263,7 +263,6 @@ class _HomePageState extends State<HomePage> {
           ),
           itemBuilder: (context, index) {
             final evento = eventos[index];
-            print(evento.imagem);
             return Container(
               decoration: BoxDecoration(
                 color: Colors.grey[900],
@@ -313,7 +312,7 @@ class _HomePageState extends State<HomePage> {
                           evento.titulo,
                           style: const TextStyle(
                               color: Colors.white, fontWeight: FontWeight.bold),
-                          maxLines: 2,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
@@ -321,7 +320,7 @@ class _HomePageState extends State<HomePage> {
                           evento.descricao,
                           style: const TextStyle(
                               color: Colors.white70, fontSize: 12),
-                          maxLines: 2,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 8),
@@ -369,7 +368,6 @@ class _HomePageState extends State<HomePage> {
       children: [
         Row(
           children: [
-            const SizedBox(width: 16),
             SizedBox(
               width: 250,
               child: TextField(

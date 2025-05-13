@@ -19,24 +19,37 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
 
   final TextEditingController _passwordController = TextEditingController();
-
+  bool isLoading = false;
+  bool obscureText = true;
   @override
   void initState() {
     super.initState();
     _checkToken();
+    setState(() {
+      isLoading = false;
+    });
   }
 
   Future<void> _checkToken() async {
+    setState(() {
+      isLoading = true;
+    });
     final token = await getToken();
     Provider.of<UsuarioProvider>(context, listen: false).loadUsuario();
     if (token != null) {
       bool isValid = await validateToken(token);
       if (isValid) {
+        setState(() {
+          isLoading = false;
+        });
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const HomePage()),
         );
       }
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -76,10 +89,20 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
+                obscureText: obscureText,
+                decoration: InputDecoration(
                   hintText: 'Senha',
                   prefixIcon: Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      obscureText ? Icons.visibility_off : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        obscureText = !obscureText;
+                      });
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -91,6 +114,9 @@ class _LoginPageState extends State<LoginPage> {
                     backgroundColor: Colors.red,
                   ),
                   onPressed: () async {
+                    setState(() {
+                      isLoading = true;
+                    });
                     await login(
                         _emailController.text, _passwordController.text);
                     final token = await getToken();
@@ -100,6 +126,9 @@ class _LoginPageState extends State<LoginPage> {
                       if (Provider.of<UsuarioProvider>(context, listen: false)
                               .usuario !=
                           null) {
+                        setState(() {
+                          isLoading = false;
+                        });
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
@@ -107,6 +136,9 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         );
                       } else {
+                        setState(() {
+                          isLoading = false;
+                        });
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text(
@@ -116,7 +148,11 @@ class _LoginPageState extends State<LoginPage> {
                       }
                     }
                   },
-                  child: const Text('Entrar'),
+                  child: isLoading
+                      ? Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : Text('Entrar'),
                 ),
               ),
               const SizedBox(height: 24),
