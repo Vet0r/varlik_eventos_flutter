@@ -170,198 +170,223 @@ class _TelaCompraIngressoState extends State<TelaCompraIngresso> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < 700;
     return Scaffold(
       backgroundColor: const Color(0xFF1E1E1E),
       body: SafeArea(
         child: Center(
           child: Container(
             constraints: const BoxConstraints(maxWidth: 1200),
-            padding: const EdgeInsets.all(24),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextButton.icon(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        label: const Text("Voltar para eventos",
-                            style: TextStyle(color: Colors.white)),
-                      ),
-                      const SizedBox(height: 12),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Image.network(
-                          '$cloudFrontUrl${widget.evento.imagem}',
-                          height: 220,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(widget.evento.titulo,
-                              style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                                color: Colors.green.shade700,
-                                borderRadius: BorderRadius.circular(12)),
-                            child: const Text("Disponível",
-                                style: TextStyle(color: Colors.white)),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(Icons.calendar_today,
-                              size: 16, color: Colors.redAccent),
-                          const SizedBox(width: 6),
-                          Text(widget.evento.data,
-                              style: const TextStyle(color: Colors.white)),
-                          const SizedBox(width: 16),
-                          const Icon(Icons.location_on,
-                              size: 16, color: Colors.redAccent),
-                          const SizedBox(width: 6),
-                          Text(widget.evento.localizacao,
-                              style: const TextStyle(color: Colors.white)),
-                          const SizedBox(width: 16),
-                          const Icon(Icons.people,
-                              size: 16, color: Colors.redAccent),
-                          const SizedBox(width: 6),
-                          Text("${widget.evento.capacidade} pessoas",
-                              style: const TextStyle(color: Colors.white)),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      const Divider(color: Colors.white24),
-                      const Text("Descrição do Evento",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white)),
-                      const SizedBox(height: 8),
-                      Text(
-                        widget.evento.descricao,
-                        style: const TextStyle(color: Colors.white70),
-                      ),
-                      const SizedBox(height: 16),
-                      const Text("O que está incluído",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white)),
-                      const SizedBox(height: 8),
-                      ...[
-                        "Acesso completo ao evento",
-                        "Almoço e lanches",
-                        "Sessões de networking",
-                        "Materiais do evento"
-                      ].map((item) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 2),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.check,
-                                    color: Colors.redAccent, size: 18),
-                                const SizedBox(width: 6),
-                                Text(item,
-                                    style:
-                                        const TextStyle(color: Colors.white)),
-                              ],
-                            ),
-                          )),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 32),
-                Expanded(
-                  flex: 1,
-                  child: Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2A2A2A),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+            padding: EdgeInsets.all(isMobile ? 8 : 24),
+            child: isMobile
+                ? SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text("Selecionar Ingressos",
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white)),
-                        const SizedBox(height: 16),
-                        Text(
-                            "Valor do Ingresso: R\$ ${widget.evento.preco.toStringAsFixed(2)}",
-                            style: const TextStyle(color: Colors.white)),
-                        const Text("Taxa de Serviço: R\$ 1,99",
-                            style: TextStyle(color: Colors.white)),
-                        const SizedBox(height: 8),
-                        Text(
-                            "Total: R\$ ${(widget.evento.preco + 1.99).toStringAsFixed(2)}",
-                            style: const TextStyle(
-                                color: Colors.redAccent,
-                                fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 16),
-                        const Text("Método de Pagamento",
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white)),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            botaoMeioDePagamento("pix"),
-                            botaoMeioDePagamento("cartao"),
-                            botaoMeioDePagamento("boleto"),
-                          ],
-                        ),
+                        _buildEventoInfo(isMobile),
                         const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              _processarCompra(widget.evento);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.redAccent,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
-                            ),
-                            child: const Text("Finalizar Compra"),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.lock, size: 16, color: Colors.white38),
-                            SizedBox(width: 4),
-                            Text("Pagamento seguro via Stripe",
-                                style: TextStyle(
-                                    color: Colors.white38, fontSize: 12)),
-                          ],
-                        )
+                        _buildCompraCard(isMobile),
                       ],
                     ),
+                  )
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: _buildEventoInfo(isMobile),
+                      ),
+                      const SizedBox(width: 32),
+                      Expanded(
+                        flex: 1,
+                        child: _buildCompraCard(isMobile),
+                      ),
+                    ],
                   ),
-                )
-              ],
-            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildEventoInfo(bool isMobile) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextButton.icon(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          label: const Text("Voltar para eventos",
+              style: TextStyle(color: Colors.white)),
+        ),
+        const SizedBox(height: 12),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Image.network(
+            '$cloudFrontUrl${widget.evento.imagem}',
+            height: isMobile ? 180 : 220,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(widget.evento.titulo,
+                  style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white)),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                  color: Colors.green.shade700,
+                  borderRadius: BorderRadius.circular(12)),
+              child: const Text("Disponível",
+                  style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 16,
+          runSpacing: 8,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.calendar_today,
+                    size: 16, color: Colors.redAccent),
+                const SizedBox(width: 6),
+                Text(widget.evento.data,
+                    style: const TextStyle(color: Colors.white)),
+              ],
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.location_on,
+                    size: 16, color: Colors.redAccent),
+                const SizedBox(width: 6),
+                Text(widget.evento.localizacao,
+                    style: const TextStyle(color: Colors.white)),
+              ],
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.people, size: 16, color: Colors.redAccent),
+                const SizedBox(width: 6),
+                Text("${widget.evento.capacidade} pessoas",
+                    style: const TextStyle(color: Colors.white)),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        const Divider(color: Colors.white24),
+        const Text("Descrição do Evento",
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        const SizedBox(height: 8),
+        Text(widget.evento.descricao,
+            style: const TextStyle(color: Colors.white70)),
+        const SizedBox(height: 16),
+        const Text("O que está incluído",
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        const SizedBox(height: 8),
+        ...[
+          "Acesso completo ao evento",
+          "Almoço e lanches",
+          "Sessões de networking",
+          "Materiais do evento"
+        ].map((item) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Row(
+                children: [
+                  const Icon(Icons.check, color: Colors.redAccent, size: 18),
+                  const SizedBox(width: 6),
+                  Text(item, style: const TextStyle(color: Colors.white)),
+                ],
+              ),
+            )),
+      ],
+    );
+  }
+
+  Widget _buildCompraCard(bool isMobile) {
+    return Container(
+      padding: EdgeInsets.all(isMobile ? 16 : 24),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2A2A2A),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text("Selecionar Ingressos",
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white)),
+          const SizedBox(height: 16),
+          Text(
+              "Valor do Ingresso: R\$ " +
+                  widget.evento.preco.toStringAsFixed(2),
+              style: const TextStyle(color: Colors.white)),
+          const Text("Taxa de Serviço: R\$ 1,99",
+              style: TextStyle(color: Colors.white)),
+          const SizedBox(height: 8),
+          Text("Total: R\$ " + (widget.evento.preco + 1.99).toStringAsFixed(2),
+              style: const TextStyle(
+                  color: Colors.redAccent, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          const Text("Método de Pagamento",
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white)),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              botaoMeioDePagamento("pix"),
+              botaoMeioDePagamento("cartao"),
+              botaoMeioDePagamento("boleto"),
+            ],
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                _processarCompra(widget.evento);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text("Finalizar Compra"),
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.lock, size: 16, color: Colors.white38),
+              SizedBox(width: 4),
+              Text("Pagamento seguro via Stripe",
+                  style: TextStyle(color: Colors.white38, fontSize: 12)),
+            ],
+          )
+        ],
       ),
     );
   }

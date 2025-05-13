@@ -214,61 +214,114 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
     );
   }
 
-  List<Widget> _buildPurchaseCards(List<MergedData> combinedData) {
+  List<Widget> _buildPurchaseCards(List<MergedData> combinedData,
+      {bool isMobile = false}) {
     return combinedData.map((item) {
       return Container(
+        width: double.infinity,
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: const Color(0xFF333333),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Row(
-          children: [
-            const Icon(LucideIcons.ticket, color: Colors.red, size: 30),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
+        child: isMobile
+            ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(item.eventoNome,
-                      style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white)),
+                  Row(
+                    children: [
+                      const Icon(LucideIcons.ticket,
+                          color: Colors.red, size: 30),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(item.eventoNome,
+                            style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
                   Text('Data da Compra: ${item.data}',
                       style: const TextStyle(color: Colors.white70)),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Chip(
+                        label: Text(item.inscricao.status.capitalize(),
+                            style: const TextStyle(color: Colors.white)),
+                        backgroundColor: item.inscricao.status == 'confirmado'
+                            ? Colors.green
+                            : Colors.red,
+                      ),
+                      const SizedBox(width: 12),
+                      Text('R\$ ${item.valor}',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, color: Colors.red)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF444444)),
+                      onPressed: () {
+                        showTicketDetailsDialog(context, item);
+                      },
+                      child: const Text('Ver Detalhes'),
+                    ),
+                  ),
+                ],
+              )
+            : Row(
+                children: [
+                  const Icon(LucideIcons.ticket, color: Colors.red, size: 30),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(item.eventoNome,
+                            style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white)),
+                        Text('Data da Compra: ${item.data}',
+                            style: const TextStyle(color: Colors.white70)),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Chip(
+                      label: Text(item.inscricao.status.capitalize(),
+                          style: const TextStyle(color: Colors.white)),
+                      backgroundColor: item.inscricao.status == 'confirmado'
+                          ? Colors.green
+                          : Colors.red,
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text('R\$ ${item.valor}',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, color: Colors.red)),
+                    ],
+                  ),
+                  const SizedBox(width: 16),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF444444)),
+                    onPressed: () {
+                      showTicketDetailsDialog(context, item);
+                    },
+                    child: const Text('Ver Detalhes'),
+                  )
                 ],
               ),
-            ),
-            Expanded(
-              child: Chip(
-                label: Text(item.inscricao.status.capitalize(),
-                    style: const TextStyle(color: Colors.white)),
-                backgroundColor: item.inscricao.status == 'confirmado'
-                    ? Colors.green
-                    : Colors.red,
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text('R\$ ${item.valor}',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.red)),
-              ],
-            ),
-            const SizedBox(width: 16),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF444444)),
-              onPressed: () {
-                showTicketDetailsDialog(context, item);
-              },
-              child: const Text('Ver Detalhes'),
-            )
-          ],
-        ),
       );
     }).toList();
   }
@@ -285,109 +338,214 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomTopBar(),
-      backgroundColor: const Color(0xFF2C2C2C),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Histórico de Compras',
-              style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
-            ),
-            const SizedBox(height: 16),
-            Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 600;
+        return Scaffold(
+          appBar: CustomTopBar(),
+          backgroundColor: const Color(0xFF2C2C2C),
+          body: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(width: 16),
-                _buildDropdown(
-                  _selectedCategory,
-                  [
-                    'Todas as Categorias',
-                    'Tecnologia',
-                    'Música',
-                    'Artes',
-                    'Esporte',
-                    'Comida',
-                    'Negócios'
-                  ],
-                  (value) {
-                    setState(() {
-                      _selectedCategory = value!;
-                    });
-                  },
+                const Text(
+                  'Histórico de Compras',
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
                 ),
-                const Spacer(),
-                SizedBox(
-                  width: 250,
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: (value) {
-                      setState(() {});
-                    },
-                    decoration: InputDecoration(
-                      prefixIcon:
-                          const Icon(Icons.search, color: Colors.white54),
-                      hintText: 'Pesquisar compras...',
-                      hintStyle: const TextStyle(color: Colors.white54),
-                      filled: true,
-                      fillColor: const Color(0xFF3A3A3A),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
+                const SizedBox(height: 16),
+                isMobile
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildDropdown(
+                            _selectedCategory,
+                            [
+                              'Todas as Categorias',
+                              'Tecnologia',
+                              'Música',
+                              'Artes',
+                              'Esporte',
+                              'Comida',
+                              'Negócios'
+                            ],
+                            (value) {
+                              setState(() {
+                                _selectedCategory = value!;
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: TextField(
+                              controller: _searchController,
+                              onChanged: (value) {
+                                setState(() {});
+                              },
+                              decoration: InputDecoration(
+                                prefixIcon: const Icon(Icons.search,
+                                    color: Colors.white54),
+                                hintText: 'Pesquisar compras...',
+                                hintStyle:
+                                    const TextStyle(color: Colors.white54),
+                                filled: true,
+                                fillColor: const Color(0xFF3A3A3A),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          const SizedBox(width: 16),
+                          _buildDropdown(
+                            _selectedCategory,
+                            [
+                              'Todas as Categorias',
+                              'Tecnologia',
+                              'Música',
+                              'Artes',
+                              'Esporte',
+                              'Comida',
+                              'Negócios'
+                            ],
+                            (value) {
+                              setState(() {
+                                _selectedCategory = value!;
+                              });
+                            },
+                          ),
+                          const Spacer(),
+                          SizedBox(
+                            width: 250,
+                            child: TextField(
+                              controller: _searchController,
+                              onChanged: (value) {
+                                setState(() {});
+                              },
+                              decoration: InputDecoration(
+                                prefixIcon: const Icon(Icons.search,
+                                    color: Colors.white54),
+                                hintText: 'Pesquisar compras...',
+                                hintStyle:
+                                    const TextStyle(color: Colors.white54),
+                                filled: true,
+                                fillColor: const Color(0xFF3A3A3A),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    style: const TextStyle(color: Colors.white),
+                const SizedBox(height: 24),
+                Expanded(
+                  child: FutureBuilder<List<MergedData>>(
+                    future: fetchCombinedData(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(
+                          child: Text(
+                            'Erro: [31m${snapshot.error}[0m',
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        );
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'Sem compras realizadas',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        );
+                      } else {
+                        final filteredData = _filterByCategory(
+                          _filterData(snapshot.data!, _searchController.text),
+                          _selectedCategory,
+                        );
+                        return SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              isMobile
+                                  ? _buildSummaryMobile(filteredData)
+                                  : _buildSummary(filteredData),
+                              const SizedBox(height: 24),
+                              ..._buildPurchaseCards(filteredData,
+                                  isMobile: isMobile),
+                            ],
+                          ),
+                        );
+                      }
+                    },
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-            Expanded(
-              child: FutureBuilder<List<MergedData>>(
-                future: fetchCombinedData(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(
-                      child: Text(
-                        'Erro: ${snapshot.error}',
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    );
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(
-                      child: Text(
-                        'Sem compras realizadas',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    );
-                  } else {
-                    final filteredData = _filterByCategory(
-                      _filterData(snapshot.data!, _searchController.text),
-                      _selectedCategory,
-                    );
-                    return SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          _buildSummary(filteredData),
-                          const SizedBox(height: 24),
-                          ..._buildPurchaseCards(filteredData),
-                        ],
-                      ),
-                    );
-                  }
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSummaryMobile(List<MergedData> combinedData) {
+    final filtered = combinedData
+        .where((item) =>
+            item.inscricao.status == 'confirmado' ||
+            item.inscricao.status == 'pendente')
+        .toList();
+    final totalSpent = filtered.fold(0.0, (sum, item) => sum + item.valor);
+    final totalEvents = filtered.length;
+    final averagePrice = totalEvents > 0 ? totalSpent / totalEvents : 0.0;
+    final lastPurchase = filtered.isNotEmpty ? filtered.last.data : 'N/A';
+
+    final summary = [
+      {'title': 'Total Gasto', 'value': 'R\$ ${totalSpent.toStringAsFixed(2)}'},
+      {'title': 'Total de Eventos', 'value': '$totalEvents'},
+      {
+        'title': 'Preço Médio',
+        'value': 'R\$ ${averagePrice.toStringAsFixed(2)}'
+      },
+      {'title': 'Última Compra', 'value': lastPurchase},
+    ];
+
+    return Column(
+      children: summary.map((item) {
+        return Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF333333),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(item['title']!,
+                  style: const TextStyle(color: Colors.white70)),
+              const SizedBox(height: 4),
+              Text(item['value']!,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.white)),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 }

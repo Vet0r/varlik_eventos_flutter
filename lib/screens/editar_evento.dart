@@ -126,6 +126,8 @@ class _EditarEventoPageState extends State<EditarEventoPage> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < 600;
     return Scaffold(
       backgroundColor: const Color(0xFF1E1E1E),
       appBar: AppBar(
@@ -134,114 +136,187 @@ class _EditarEventoPageState extends State<EditarEventoPage> {
         foregroundColor: Colors.white,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Edite os detalhes do evento abaixo',
-                style: TextStyle(color: Colors.grey),
-              ),
-              const SizedBox(height: 24),
-              _buildTextField('Título do Evento',
-                  controller: _tituloController,
-                  validator: (v) => v!.isEmpty ? 'Obrigatório' : null),
-              const SizedBox(height: 16),
-              _buildTextField('Descrição do Evento',
-                  controller: _descricaoController,
-                  maxLines: 5,
-                  validator: (v) => v!.isEmpty ? 'Obrigatório' : null),
-              const SizedBox(height: 16),
-              Row(
+      body: Center(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(isMobile ? 24 : 48),
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 12 : 48,
+              vertical: isMobile ? 16 : 32,
+            ),
+            constraints: BoxConstraints(
+              maxWidth: isMobile ? 600 : 700,
+              minWidth: isMobile ? 0 : 400,
+            ),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2C2C2C),
+              borderRadius: BorderRadius.circular(isMobile ? 16 : 24),
+              boxShadow: isMobile
+                  ? []
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.18),
+                        blurRadius: 32,
+                        offset: const Offset(0, 12),
+                      ),
+                    ],
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: _buildDateField()),
-                  const SizedBox(width: 16),
-                  Expanded(child: _buildDropdown('Categoria')),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                      child: _buildTextField('Local',
-                          controller: _localController,
-                          validator: (v) => v!.isEmpty ? 'Obrigatório' : null)),
-                  const SizedBox(width: 16),
-                  Expanded(
-                      child: _buildTextField('Capacidade Máxima',
-                          controller: _capacidadeController,
-                          validator: (v) => v!.isEmpty ? 'Obrigatório' : null)),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _buildTextField('Preço',
-                  controller: _precoController,
-                  prefixText: 'R\$ ',
-                  width: 150,
-                  validator: (v) => v!.isEmpty ? 'Obrigatório' : null),
-              const SizedBox(height: 24),
-              Container(
-                height: 150,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.withOpacity(0.5)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: _uploading
-                      ? const CircularProgressIndicator()
-                      : Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (_imagemSelecionada != null)
-                              Text(
-                                  'Imagem Selecionada: ${_imagemSelecionada!.path.split('/').last}'),
-                            if (_imagemSelecionada == null &&
-                                widget.evento.imagem.isNotEmpty)
-                              Text(
-                                  'Imagem atual: ${widget.evento.imagem.split('/').last}'),
-                            const Icon(Icons.cloud_upload_outlined,
-                                size: 40, color: Colors.white70),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Arraste e solte sua imagem aqui, ou',
-                              style: TextStyle(color: Colors.white70),
-                            ),
-                            const SizedBox(height: 8),
-                            ElevatedButton(
-                              onPressed: _pickImage,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[800],
-                              ),
-                              child: const Text('Procurar Arquivos'),
-                            )
-                          ],
-                        ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: TextButton.styleFrom(foregroundColor: Colors.white),
-                    child: const Text('Cancelar'),
+                  const Text(
+                    'Edite os detalhes do evento abaixo',
+                    style: TextStyle(color: Colors.grey),
                   ),
-                  const SizedBox(width: 12),
-                  ElevatedButton.icon(
-                    onPressed: _atualizarEvento,
-                    icon: const Icon(Icons.save),
-                    label: const Text('Salvar Alterações'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: TextFormField(
+                          controller: _tituloController,
+                          decoration: const InputDecoration(
+                            labelText: 'Título',
+                            filled: true,
+                            fillColor: Color(0xFF3A3A3A),
+                            labelStyle: TextStyle(color: Colors.white),
+                            border:
+                                OutlineInputBorder(borderSide: BorderSide.none),
+                          ),
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      if (!isMobile) const SizedBox(width: 8),
+                      if (!isMobile)
+                        Flexible(
+                          child: TextFormField(
+                            controller: _localController,
+                            decoration: const InputDecoration(
+                              labelText: 'Local',
+                              filled: true,
+                              fillColor: Color(0xFF3A3A3A),
+                              labelStyle: TextStyle(color: Colors.white),
+                              border: OutlineInputBorder(
+                                  borderSide: BorderSide.none),
+                            ),
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                    ],
+                  ),
+                  if (isMobile) ...[
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _localController,
+                      decoration: const InputDecoration(
+                        labelText: 'Local',
+                        filled: true,
+                        fillColor: Color(0xFF3A3A3A),
+                        labelStyle: TextStyle(color: Colors.white),
+                        border: OutlineInputBorder(borderSide: BorderSide.none),
+                      ),
+                      style: const TextStyle(color: Colors.white),
                     ),
+                  ],
+                  const SizedBox(height: 12),
+                  _buildTextField('Descrição do Evento',
+                      controller: _descricaoController,
+                      maxLines: 5,
+                      validator: (v) => v!.isEmpty ? 'Obrigatório' : null),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(child: _buildDateField()),
+                      const SizedBox(width: 16),
+                      Expanded(child: _buildDropdown('Categoria')),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                          child: _buildTextField('Local',
+                              controller: _localController,
+                              validator: (v) =>
+                                  v!.isEmpty ? 'Obrigatório' : null)),
+                      const SizedBox(width: 16),
+                      Expanded(
+                          child: _buildTextField('Capacidade Máxima',
+                              controller: _capacidadeController,
+                              validator: (v) =>
+                                  v!.isEmpty ? 'Obrigatório' : null)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField('Preço',
+                      controller: _precoController,
+                      prefixText: 'R\$ ',
+                      width: 150,
+                      validator: (v) => v!.isEmpty ? 'Obrigatório' : null),
+                  const SizedBox(height: 24),
+                  Container(
+                    height: 150,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.withOpacity(0.5)),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: _uploading
+                          ? const CircularProgressIndicator()
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                if (_imagemSelecionada != null)
+                                  Text(
+                                      'Imagem Selecionada: ${_imagemSelecionada!.path.split('/').last}'),
+                                if (_imagemSelecionada == null &&
+                                    widget.evento.imagem.isNotEmpty)
+                                  Text(
+                                      'Imagem atual: ${widget.evento.imagem.split('/').last}'),
+                                const Icon(Icons.cloud_upload_outlined,
+                                    size: 40, color: Colors.white70),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Arraste e solte sua imagem aqui, ou',
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                                const SizedBox(height: 8),
+                                ElevatedButton(
+                                  onPressed: _pickImage,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.grey[800],
+                                  ),
+                                  child: const Text('Procurar Arquivos'),
+                                )
+                              ],
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        style:
+                            TextButton.styleFrom(foregroundColor: Colors.white),
+                        child: const Text('Cancelar'),
+                      ),
+                      const SizedBox(width: 12),
+                      ElevatedButton.icon(
+                        onPressed: _atualizarEvento,
+                        icon: const Icon(Icons.save),
+                        label: const Text('Salvar Alterações'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                        ),
+                      )
+                    ],
                   )
                 ],
-              )
-            ],
+              ),
+            ),
           ),
         ),
       ),
@@ -272,7 +347,7 @@ class _EditarEventoPageState extends State<EditarEventoPage> {
           prefixText: prefixText,
           prefixStyle: const TextStyle(color: Colors.white),
           filled: true,
-          fillColor: const Color(0xFF2C2C2C),
+          fillColor: const Color(0xFF3A3A3A),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide.none,

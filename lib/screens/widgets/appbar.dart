@@ -14,16 +14,24 @@ class CustomTopBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < 600;
     return AppBar(
-      backgroundColor: const Color(0xFF2C2C2E),
-      elevation: 0,
-      titleSpacing: 20,
+      backgroundColor: const Color(0xFF1F1F1F),
+      title: Text(
+        'Varlik Eventos',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: isMobile ? 18 : 24,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
       actions: [
         const SizedBox(width: 12),
         Text(
           Provider.of<UsuarioProvider>(context, listen: false).usuario!.name,
-          style: const TextStyle(
-            fontSize: 16,
+          style: TextStyle(
+            fontSize: isMobile ? 14 : 16,
             color: Colors.white,
           ),
         ),
@@ -32,7 +40,7 @@ class CustomTopBar extends StatelessWidget implements PreferredSizeWidget {
           backgroundImage: NetworkImage(
             'https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Sample_User_Icon.png/600px-Sample_User_Icon.png',
           ),
-          radius: 16,
+          radius: isMobile ? 14 : 16,
         ),
         const SizedBox(width: 12),
         IconButton(

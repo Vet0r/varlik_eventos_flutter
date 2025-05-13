@@ -143,78 +143,123 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
   Widget build(BuildContext context) {
     final valorTotal = comprasPendentes.fold(0.0, (s, c) => s + c.valor);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF1F1F1F),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: const Text('Painel de Disputas',
-            style: TextStyle(color: Colors.white)),
-        centerTitle: false,
-        elevation: 0,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Gerencie e revise compras pendentes',
-                    style: TextStyle(color: Colors.white70, fontSize: 16),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 600;
+        return Scaffold(
+          backgroundColor: const Color(0xFF1F1F1F),
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            title: const Text('Painel de Disputas',
+                style: TextStyle(color: Colors.white)),
+            centerTitle: false,
+            elevation: 0,
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(16),
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildInfoCard('Compras Pendentes',
-                          comprasPendentes.length.toString(), '', Colors.amber),
-                      _buildInfoCard(
-                          'Valor Total',
-                          'R\$ ${valorTotal.toStringAsFixed(2)}',
-                          'Aguardando aprovação',
-                          Colors.white),
+                      const Text(
+                        'Gerencie e revise compras pendentes',
+                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      ),
+                      const SizedBox(height: 16),
+                      isMobile
+                          ? Column(
+                              children: [
+                                _buildInfoCardMobile(
+                                    'Compras Pendentes',
+                                    comprasPendentes.length.toString(),
+                                    '',
+                                    Colors.amber),
+                                const SizedBox(height: 8),
+                                _buildInfoCardMobile(
+                                    'Valor Total',
+                                    'R\$ ${valorTotal.toStringAsFixed(2)}',
+                                    'Aguardando aprovação',
+                                    Colors.white),
+                              ],
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                    child: _buildInfoCard(
+                                        'Compras Pendentes',
+                                        comprasPendentes.length.toString(),
+                                        '',
+                                        Colors.amber)),
+                                Expanded(
+                                    child: _buildInfoCard(
+                                        'Valor Total',
+                                        'R\$ ${valorTotal.toStringAsFixed(2)}',
+                                        'Aguardando aprovação',
+                                        Colors.white)),
+                              ],
+                            ),
+                      const SizedBox(height: 20),
+                      const Text('Compras Pendentes',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 10),
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            color: const Color(0xFF2A2A2A),
+                          ),
+                          child: Column(
+                            children: [
+                              _buildTableHeader(isMobile: isMobile),
+                              Expanded(
+                                child: comprasPendentes.isEmpty
+                                    ? const Center(
+                                        child: Text(
+                                          'Nenhuma compra pendente',
+                                          style:
+                                              TextStyle(color: Colors.white54),
+                                        ),
+                                      )
+                                    : isMobile
+                                        ? SingleChildScrollView(
+                                            scrollDirection: Axis.horizontal,
+                                            child: SizedBox(
+                                              width: 700,
+                                              child: ListView.builder(
+                                                itemCount:
+                                                    comprasPendentes.length,
+                                                itemBuilder: (context, index) {
+                                                  final compra =
+                                                      comprasPendentes[index];
+                                                  return _buildTableRow(compra,
+                                                      isMobile: isMobile);
+                                                },
+                                              ),
+                                            ),
+                                          )
+                                        : ListView.builder(
+                                            itemCount: comprasPendentes.length,
+                                            itemBuilder: (context, index) {
+                                              final compra =
+                                                  comprasPendentes[index];
+                                              return _buildTableRow(compra);
+                                            },
+                                          ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 20),
-                  const Text('Compras Pendentes',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 10),
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: const Color(0xFF2A2A2A),
-                      ),
-                      child: Column(
-                        children: [
-                          _buildTableHeader(),
-                          Expanded(
-                            child: comprasPendentes.isEmpty
-                                ? const Center(
-                                    child: Text(
-                                      'Nenhuma compra pendente',
-                                      style: TextStyle(color: Colors.white54),
-                                    ),
-                                  )
-                                : ListView.builder(
-                                    itemCount: comprasPendentes.length,
-                                    itemBuilder: (context, index) {
-                                      final compra = comprasPendentes[index];
-                                      return _buildTableRow(compra);
-                                    },
-                                  ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -246,30 +291,47 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
     );
   }
 
-  Widget _buildTableHeader() {
+  Widget _buildTableHeader({bool isMobile = false}) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       color: const Color(0xFF333333),
-      child: const Row(
+      child: Row(
         children: [
-          Expanded(child: Text('ID', style: TextStyle(color: Colors.white))),
           Expanded(
-              child: Text('Evento', style: TextStyle(color: Colors.white))),
+              child: Text('ID',
+                  style: TextStyle(
+                      color: Colors.white, fontSize: isMobile ? 12 : 14))),
           Expanded(
-              child: Text('Cliente', style: TextStyle(color: Colors.white))),
-          Expanded(child: Text('Data', style: TextStyle(color: Colors.white))),
-          Expanded(child: Text('Valor', style: TextStyle(color: Colors.white))),
+              child: Text('Evento',
+                  style: TextStyle(
+                      color: Colors.white, fontSize: isMobile ? 12 : 14))),
           Expanded(
-              child: Text('Status', style: TextStyle(color: Colors.white))),
+              child: Text('Cliente',
+                  style: TextStyle(
+                      color: Colors.white, fontSize: isMobile ? 12 : 14))),
+          Expanded(
+              child: Text('Data',
+                  style: TextStyle(
+                      color: Colors.white, fontSize: isMobile ? 12 : 14))),
+          Expanded(
+              child: Text('Valor',
+                  style: TextStyle(
+                      color: Colors.white, fontSize: isMobile ? 12 : 14))),
+          Expanded(
+              child: Text('Status',
+                  style: TextStyle(
+                      color: Colors.white, fontSize: isMobile ? 12 : 14))),
           SizedBox(
-              width: 80,
-              child: Text('Ação', style: TextStyle(color: Colors.white))),
+              width: isMobile ? 100 : 80,
+              child: Text('Ação',
+                  style: TextStyle(
+                      color: Colors.white, fontSize: isMobile ? 12 : 14))),
         ],
       ),
     );
   }
 
-  Widget _buildTableRow(MergedData compra) {
+  Widget _buildTableRow(MergedData compra, {bool isMobile = false}) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       decoration: const BoxDecoration(
@@ -279,10 +341,12 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
         children: [
           Expanded(
               child: Text('#PUR-${compra.pagamento.id}',
-                  style: const TextStyle(color: Colors.white))),
+                  style: TextStyle(
+                      color: Colors.white, fontSize: isMobile ? 12 : 14))),
           Expanded(
               child: Text(compra.eventoNome,
-                  style: const TextStyle(color: Colors.white))),
+                  style: TextStyle(
+                      color: Colors.white, fontSize: isMobile ? 12 : 14))),
           Expanded(
             child: Row(
               children: [
@@ -293,12 +357,13 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
                   children: [
                     Text(
                       compra.nomeUsuario ?? 'Cliente',
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(
+                          color: Colors.white, fontSize: isMobile ? 12 : 14),
                     ),
                     Text(
                       compra.emailUsuario ?? '',
-                      style:
-                          const TextStyle(color: Colors.white54, fontSize: 12),
+                      style: TextStyle(
+                          color: Colors.white54, fontSize: isMobile ? 10 : 12),
                     ),
                   ],
                 )
@@ -307,14 +372,17 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
           ),
           Expanded(
               child: Text(compra.data,
-                  style: const TextStyle(color: Colors.white))),
+                  style: TextStyle(
+                      color: Colors.white, fontSize: isMobile ? 12 : 14))),
           Expanded(
               child: Text('R\$ ${compra.valor.toStringAsFixed(2)}',
-                  style: const TextStyle(color: Colors.white))),
+                  style: TextStyle(
+                      color: Colors.white, fontSize: isMobile ? 12 : 14))),
           Expanded(
             child: Chip(
               label: Text(compra.pagamento.status.capitalize(),
-                  style: const TextStyle(color: Colors.white)),
+                  style: TextStyle(
+                      color: Colors.white, fontSize: isMobile ? 12 : 14)),
               backgroundColor: compra.pagamento.status == 'pendente'
                   ? Colors.orange
                   : compra.pagamento.status == 'aprovado'
@@ -323,20 +391,22 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
             ),
           ),
           SizedBox(
-            width: 200,
+            width: isMobile ? 100 : 200,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 IconButton(
-                  icon: Text('Aprovar Rembolso',
-                      style: const TextStyle(color: Colors.green)),
+                  icon: Text('Aprovar',
+                      style: TextStyle(
+                          color: Colors.green, fontSize: isMobile ? 10 : 14)),
                   onPressed: compra.pagamento.status == 'pendente'
                       ? () => aprovarRembolso(compra)
                       : null,
                 ),
                 IconButton(
-                  icon: Text('Rejeitar Rembolso',
-                      style: const TextStyle(color: Colors.red)),
+                  icon: Text('Rejeitar',
+                      style: TextStyle(
+                          color: Colors.red, fontSize: isMobile ? 10 : 14)),
                   onPressed: compra.pagamento.status == 'pendente'
                       ? () => rejeitarReembolso(compra)
                       : null,
@@ -344,6 +414,33 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoCardMobile(
+      String title, String value, String subtitle, Color color) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2A2A2A),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(color: Colors.white60)),
+          const SizedBox(height: 8),
+          Text(value,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold)),
+          const SizedBox(height: 4),
+          Text(subtitle, style: TextStyle(color: color, fontSize: 12)),
         ],
       ),
     );

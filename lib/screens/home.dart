@@ -363,125 +363,251 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildFiltros() {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < 700;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            SizedBox(
-              width: 250,
-              child: TextField(
-                controller: _nomeEventoController,
-                decoration: inputDecoration.copyWith(
-                  hintText: 'Nome do Evento',
-                  prefixIcon: const Icon(Icons.event, color: Colors.white54),
-                ),
-                style: const TextStyle(color: Colors.white),
-                onSubmitted: (value) {
-                  setState(() {
-                    nomeEventoSelecionado = value.isNotEmpty ? value : null;
-                  });
-                },
+        isMobile
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: _nomeEventoController,
+                    decoration: inputDecoration.copyWith(
+                      hintText: 'Nome do Evento',
+                      prefixIcon:
+                          const Icon(Icons.event, color: Colors.white54),
+                    ),
+                    style: const TextStyle(color: Colors.white),
+                    onSubmitted: (value) {
+                      setState(() {
+                        nomeEventoSelecionado = value.isNotEmpty ? value : null;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          readOnly: true,
+                          controller: TextEditingController(
+                            text: dataInicio == null
+                                ? 'dd/mm/aaaa'
+                                : '${dataInicio!.day}/${dataInicio!.month}/${dataInicio!.year}',
+                          ),
+                          onTap: () async {
+                            final pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (pickedDate != null) {
+                              setState(() {
+                                dataInicio = pickedDate;
+                              });
+                            }
+                          },
+                          style: const TextStyle(color: Colors.white),
+                          decoration: inputDecoration.copyWith(
+                            suffixIcon: const Icon(Icons.calendar_today,
+                                color: Colors.white54),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: TextFormField(
+                          readOnly: true,
+                          controller: TextEditingController(
+                            text: dataFim == null
+                                ? 'dd/mm/aaaa'
+                                : '${dataFim!.day}/${dataFim!.month}/${dataFim!.year}',
+                          ),
+                          onTap: () async {
+                            final pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (pickedDate != null) {
+                              setState(() {
+                                dataFim = pickedDate;
+                              });
+                            }
+                          },
+                          style: const TextStyle(color: Colors.white),
+                          decoration: inputDecoration.copyWith(
+                            suffixIcon: const Icon(Icons.calendar_today,
+                                color: Colors.white54),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _localizacaoController,
+                    decoration: inputDecoration.copyWith(
+                      hintText: 'Localização',
+                      prefixIcon:
+                          const Icon(Icons.search, color: Colors.white54),
+                    ),
+                    style: const TextStyle(color: Colors.white),
+                    onSubmitted: (value) {
+                      setState(() {
+                        localizacaoSelecionada =
+                            value.isNotEmpty ? value : null;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      icon: const Icon(Icons.refresh, color: Colors.red),
+                      label: const Text(
+                        'Resetar Filtros',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          categoriaSelecionada = null;
+                          localizacaoSelecionada = null;
+                          nomeEventoSelecionado = null;
+                          dataInicio = null;
+                          dataFim = null;
+                          _localizacaoController.clear();
+                          _nomeEventoController.clear();
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              )
+            : Row(
+                children: [
+                  SizedBox(
+                    width: 250,
+                    child: TextField(
+                      controller: _nomeEventoController,
+                      decoration: inputDecoration.copyWith(
+                        hintText: 'Nome do Evento',
+                        prefixIcon:
+                            const Icon(Icons.event, color: Colors.white54),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                      onSubmitted: (value) {
+                        setState(() {
+                          nomeEventoSelecionado =
+                              value.isNotEmpty ? value : null;
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  SizedBox(
+                    width: 160,
+                    child: TextFormField(
+                      readOnly: true,
+                      controller: TextEditingController(
+                        text: dataInicio == null
+                            ? 'dd/mm/aaaa'
+                            : '${dataInicio!.day}/${dataInicio!.month}/${dataInicio!.year}',
+                      ),
+                      onTap: () async {
+                        final pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (pickedDate != null) {
+                          setState(() {
+                            dataInicio = pickedDate;
+                          });
+                        }
+                      },
+                      style: const TextStyle(color: Colors.white),
+                      decoration: inputDecoration.copyWith(
+                        suffixIcon: const Icon(Icons.calendar_today,
+                            color: Colors.white54),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  SizedBox(
+                    width: 160,
+                    child: TextFormField(
+                      readOnly: true,
+                      controller: TextEditingController(
+                        text: dataFim == null
+                            ? 'dd/mm/aaaa'
+                            : '${dataFim!.day}/${dataFim!.month}/${dataFim!.year}',
+                      ),
+                      onTap: () async {
+                        final pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (pickedDate != null) {
+                          setState(() {
+                            dataFim = pickedDate;
+                          });
+                        }
+                      },
+                      style: const TextStyle(color: Colors.white),
+                      decoration: inputDecoration.copyWith(
+                        suffixIcon: const Icon(Icons.calendar_today,
+                            color: Colors.white54),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  SizedBox(
+                    width: 250,
+                    child: TextField(
+                      controller: _localizacaoController,
+                      decoration: inputDecoration.copyWith(
+                        hintText: 'Localização',
+                        prefixIcon:
+                            const Icon(Icons.search, color: Colors.white54),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                      onSubmitted: (value) {
+                        setState(() {
+                          localizacaoSelecionada =
+                              value.isNotEmpty ? value : null;
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  TextButton.icon(
+                    icon: const Icon(Icons.refresh, color: Colors.red),
+                    label: const Text(
+                      'Resetar Filtros',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        categoriaSelecionada = null;
+                        localizacaoSelecionada = null;
+                        nomeEventoSelecionado = null;
+                        dataInicio = null;
+                        dataFim = null;
+                        _localizacaoController.clear();
+                        _nomeEventoController.clear();
+                      });
+                    },
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(width: 16),
-            SizedBox(
-              width: 160,
-              child: TextFormField(
-                readOnly: true,
-                controller: TextEditingController(
-                  text: dataInicio == null
-                      ? 'dd/mm/aaaa'
-                      : '${dataInicio!.day}/${dataInicio!.month}/${dataInicio!.year}',
-                ),
-                onTap: () async {
-                  final pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (pickedDate != null) {
-                    setState(() {
-                      dataInicio = pickedDate;
-                    });
-                  }
-                },
-                style: const TextStyle(color: Colors.white),
-                decoration: inputDecoration.copyWith(
-                  suffixIcon:
-                      const Icon(Icons.calendar_today, color: Colors.white54),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            SizedBox(
-              width: 160,
-              child: TextFormField(
-                readOnly: true,
-                controller: TextEditingController(
-                  text: dataFim == null
-                      ? 'dd/mm/aaaa'
-                      : '${dataFim!.day}/${dataFim!.month}/${dataFim!.year}',
-                ),
-                onTap: () async {
-                  final pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (pickedDate != null) {
-                    setState(() {
-                      dataFim = pickedDate;
-                    });
-                  }
-                },
-                style: const TextStyle(color: Colors.white),
-                decoration: inputDecoration.copyWith(
-                  suffixIcon:
-                      const Icon(Icons.calendar_today, color: Colors.white54),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            SizedBox(
-              width: 250,
-              child: TextField(
-                controller: _localizacaoController,
-                decoration: inputDecoration.copyWith(
-                  hintText: 'Localização',
-                  prefixIcon: const Icon(Icons.search, color: Colors.white54),
-                ),
-                style: const TextStyle(color: Colors.white),
-                onSubmitted: (value) {
-                  setState(() {
-                    localizacaoSelecionada = value.isNotEmpty ? value : null;
-                  });
-                },
-              ),
-            ),
-            const SizedBox(width: 16),
-            TextButton.icon(
-              icon: const Icon(Icons.refresh, color: Colors.red),
-              label: const Text(
-                'Resetar Filtros',
-                style: TextStyle(color: Colors.red),
-              ),
-              onPressed: () {
-                setState(() {
-                  categoriaSelecionada = null;
-                  localizacaoSelecionada = null;
-                  nomeEventoSelecionado = null;
-                  dataInicio = null;
-                  dataFim = null;
-                  _localizacaoController.clear();
-                  _nomeEventoController.clear();
-                });
-              },
-            ),
-          ],
-        ),
       ],
     );
   }
@@ -489,7 +615,7 @@ class _HomePageState extends State<HomePage> {
 
 final inputDecoration = InputDecoration(
   filled: true,
-  fillColor: const Color(0xFF2C2C2E), // tom escuro
+  fillColor: const Color(0xFF2C2C2E),
   hintStyle: const TextStyle(color: Colors.white70),
   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
   border: OutlineInputBorder(

@@ -143,6 +143,8 @@ class _PainelOrganizadorState extends State<PainelOrganizador> {
       );
     }
 
+    final isMobile = MediaQuery.of(context).size.width < 700;
+
     return Scaffold(
       backgroundColor: const Color(0xFF1F1F1F),
       appBar: CustomTopBar(),
@@ -156,28 +158,48 @@ class _PainelOrganizadorState extends State<PainelOrganizador> {
                   style: TextStyle(color: Colors.grey)),
               const SizedBox(height: 20),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildStatCard(Icons.event, 'Total de Eventos',
-                      eventos.length.toString()),
-                  _buildStatCard(Icons.people, 'Participantes Potenciais',
-                      totalParticipantes.toString()),
-                  _buildStatCard(
-                    Icons.people_alt,
-                    'Participantes Reais',
-                    _calcularParticipantesReais().toStringAsFixed(0),
-                  ),
-                  _buildStatCard(
-                    Icons.attach_money,
-                    'Ganhos Potenciais',
-                    'R\$${totalGanhos.toStringAsFixed(2)}',
-                  ),
-                  _buildStatCard(
-                    Icons.attach_money,
-                    'Ganhos Reais',
-                    'R\$${ganhosReais.toStringAsFixed(2)}',
-                  ),
-                ],
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: isMobile
+                    ? [
+                        SizedBox(
+                          height: 120,
+                          width: MediaQuery.of(context).size.width,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: [
+                              _buildStatCard(Icons.event, 'Total de Eventos',
+                                  eventos.length.toString()),
+                              _buildStatCard(
+                                  Icons.people,
+                                  'Participantes Potenciais',
+                                  totalParticipantes.toString()),
+                              _buildStatCard(
+                                  Icons.people_alt,
+                                  'Participantes Reais',
+                                  _calcularParticipantesReais()
+                                      .toStringAsFixed(0)),
+                              _buildStatCard(
+                                  Icons.attach_money,
+                                  'Ganhos Potenciais',
+                                  'R\$${totalGanhos.toStringAsFixed(2)}'),
+                              _buildStatCard(Icons.attach_money, 'Ganhos Reais',
+                                  'R\$${ganhosReais.toStringAsFixed(2)}'),
+                            ],
+                          ),
+                        ),
+                      ]
+                    : [
+                        _buildStatCard(Icons.event, 'Total de Eventos',
+                            eventos.length.toString()),
+                        _buildStatCard(Icons.people, 'Participantes Potenciais',
+                            totalParticipantes.toString()),
+                        _buildStatCard(Icons.people_alt, 'Participantes Reais',
+                            _calcularParticipantesReais().toStringAsFixed(0)),
+                        _buildStatCard(Icons.attach_money, 'Ganhos Potenciais',
+                            'R\$${totalGanhos.toStringAsFixed(2)}'),
+                        _buildStatCard(Icons.attach_money, 'Ganhos Reais',
+                            'R\$${ganhosReais.toStringAsFixed(2)}'),
+                      ],
               ),
               const SizedBox(height: 30),
               const Text("Próximos Eventos",
@@ -204,32 +226,40 @@ class _PainelOrganizadorState extends State<PainelOrganizador> {
   }
 
   Widget _buildStatCard(IconData icon, String titulo, String valor) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        decoration: BoxDecoration(
-          color: const Color(0xFF2A2A2A),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: Colors.white),
-            const SizedBox(height: 12),
-            Text(titulo, style: const TextStyle(color: Colors.grey)),
-            Text(valor,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-          ],
-        ),
+    return Container(
+      width: 150,
+      height: 120,
+      margin: const EdgeInsets.only(right: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2A2A2A),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.white),
+          const SizedBox(height: 8),
+          Text(
+            titulo,
+            style: const TextStyle(color: Colors.grey, fontSize: 13),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(valor,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold)),
+        ],
       ),
     );
   }
 
   Widget _buildEventoCard(Evento evento) {
+    final isMobile = MediaQuery.of(context).size.width < 700;
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -240,8 +270,9 @@ class _PainelOrganizadorState extends State<PainelOrganizador> {
         );
       },
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.only(right: 8.0),
         child: Container(
+          width: isMobile ? 260 : 320,
           margin: const EdgeInsets.symmetric(vertical: 8),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -258,6 +289,8 @@ class _PainelOrganizadorState extends State<PainelOrganizador> {
                       fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               Text(evento.descricao,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(color: Colors.grey)),
               const SizedBox(height: 8),
               Text('Data: ${evento.data}',
