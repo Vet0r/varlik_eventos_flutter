@@ -87,7 +87,7 @@ class _HomePageState extends State<HomePage> {
                         const SizedBox(height: 20),
                         _buildCategorias(),
                         const SizedBox(height: 30),
-                        _buildEventos(eventosFiltrados.skip(1).toList()),
+                        _buildEventos(eventosFiltrados.toList()),
                       ],
                     ),
                   ),
@@ -188,7 +188,7 @@ class _HomePageState extends State<HomePage> {
         children: categorias
             .map(
               (cat) => Padding(
-                padding: const EdgeInsets.all(4.0),
+                padding: const EdgeInsets.only(right: 8.0),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
                   onTap: () {
